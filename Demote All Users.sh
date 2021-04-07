@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Use $4 for your standard admin user account
-excluded_user="$4"
+# $4 should be your local admin account
+# $5 should be your Jamf management account
+
 local_admins=`dscl . read /Groups/admin GroupMembership | cut -d " " -f 2-`
 
 function delete_admin_user
@@ -13,7 +15,10 @@ function delete_admin_user
                         root)
                                 echo "$1 user"
                                 ;;
-                        $excluded_user)
+                        $4)
+                                echo "$1 intended admin"
+                                ;;
+                        $5)
                                 echo "$1 intended admin"
                                 ;;
                         *)
