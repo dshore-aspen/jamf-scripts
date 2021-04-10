@@ -1,12 +1,14 @@
 #!/bin/bash
 
-touch ~/Desktop/test/1\ test.txt
-touch ~/Desktop/test/2.txt
-
-
+echo "[USER ADD]----Collecting all relevant users"
+#	Gather all existing users in a variable
 allUsers=$(dscl . -ls /Users)
+
+#	Turn it into an array
 list=($allUsers)
 realUsers=()
+
+#	Filter out the users we don't want and put the rest in a new variable
 for i in ${!list[@]}; 
 do
 
@@ -26,14 +28,14 @@ do
 done
 echo "[USER LIST]----${realUsers[*]}"
 
-
+#	All the places where settings hide in user folders
 userFiles=(
-Desktop/test/1\ test.txt
-Desktop/test/2.txt
 Library/Application\ Support/Adobe/AIR/
 Library/Caches/com.adobe.air.Installer
 Library/Preferences/com.adobe.air.els.*
 )
+
+#	All the other settings
 airFiles=(
 "/Applications/Adobe/Flash Player/AddIns/airappinstaller/airappinstaller"
 "/Applications/Utilities/Adobe AIR Uninstaller.app"
@@ -54,12 +56,13 @@ echo "----------------"
 echo "[BEGINNING]----Beginning to check for files"
 echo "----------------"
 
+#	Delete all the main /Library files first and report as you go
 for i in ${!airFiles[@]};
 do
 		rm -r "${airFiles[$i]}" && echo "[FOUND]----${airFiles[$i]}"  ||  echo "[MISSING]----${airFiles[$i]}"
 done
 
-
+#	Delete all the user files and report as you go
 for u in ${!realUsers[@]};
 do
 	user=${realUsers[$u]}
