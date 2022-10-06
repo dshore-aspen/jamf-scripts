@@ -1,4 +1,8 @@
 #!/bin/bash
+### WARNING     ###
+###             ###
+### --- This script still does not properly work to recognize users in these parameters. ---###
+
 
 # Use $4 for your standard admin user account
 # $4 should be your local admin account
