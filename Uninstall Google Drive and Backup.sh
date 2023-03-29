@@ -8,6 +8,18 @@ sleep 10
 rm -rf /Applications/Backup\ and\ Sync*
 rm -rf /Applications/Google\ Drive*
 
+declare -a personalConfigs=(
+~/Library/Preferences/com.google.*
+~/Library/Google
+~/Library/Application\ Support/Google/DriveFS
+~/Library/Caches/com.google*
+~/Library/Containers/Google\ Drive/
+~/Library/Containers/com.google*
+~/Library/Saved\ Application\ State/com.google*
+
+)
+
+
 if {{ $4 = "n" }}; then
 	echo "[SKIPPING DELETE]---- Applications have been deleted but user files will not be deleted."
 	exit 0
