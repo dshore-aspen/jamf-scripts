@@ -1,6 +1,10 @@
 #!/bin/bash
 
 eulaFolder=/Users/Shared/EULA.txt
+if [[ ! -z $5 ]]; then
+	eulaFolder=$5
+fi
+
 echo "folder = $eulaFolder"
 
 statUser=$(stat -f "%Su" /dev/console)
