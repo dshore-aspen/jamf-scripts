@@ -9,15 +9,15 @@ rm -rf /Applications/Backup\ and\ Sync*
 rm -rf /Applications/Google\ Drive*
 
 declare -a personalConfigs=(
-~/Library/Preferences/com.google.*
-~/Library/Google
-~/Library/Application\ Support/Google/DriveFS
-~/Library/Caches/com.google*
-~/Library/Containers/Google\ Drive/
-~/Library/Containers/com.google*
-~/Library/Saved\ Application\ State/com.google*
-
+"${i}"/Library/Preferences/com.google.*
+"${i}"/Library/Google
+"${i}"/Library/Application\ Support/Google/DriveFS
+"${i}"/Library/Caches/com.google*
+"${i}"/Library/Containers/Google\ Drive/
+"${i}"/Library/Containers/com.google*
+"${i}"/Library/Saved\ Application\ State/com.google*
 )
+
 
 
 if {{ $4 = "n" }}; then
@@ -35,4 +35,7 @@ for i in /Users/* ; do
 		fi
 	fi
 done
+	
+	
+	
 	
