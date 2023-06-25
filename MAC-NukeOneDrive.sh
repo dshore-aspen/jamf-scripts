@@ -1,5 +1,5 @@
 #!/bin/bash
-# Version 1.1
+# Version 1.3
 # This script is meant to remove all traces of OneDrive
 # It starts by running the ResetOneDriveAppStandalone.command
 # It then hunts for all OneDrive directories and files throughout the 
@@ -41,6 +41,7 @@ for location in ${leftovers[@]} ; do
 	
 # 	Within the current location, build an array of all target items
 	if (ls $location/ | grep *OneDrive*); then
+		echo "LOCATION CHECK---" ls $location/ | grep *OneDrive*
 		declare -a targets=($location/*OneDrive*)
 		
 # 		For each target found in current location, increment the fileCount variable, attempt to delete the file
@@ -62,16 +63,24 @@ echo "FILE COUNT--- Found $fileCount files so far."
 # space in the directory path messed with the arrays.
 cd /Users/$statUser/Library/Application\ Support/
 if (ls ./ | grep *OneDrive*); then
-	for t in $(ls ./ | grep *OneDrive*); do
-	fileCount=$((fileCount+1))
-		t=${t%?}
+	for t in $(ls ./ | grep OneDrive); do
+		fileCount=$((fileCount+1))
+		if ( $t | *: ) ; then
+				t=${t%?}
+				echo "FILE NAME FIXED--- $t"
+		fi
 		echo "FILE FOUND--- $t"
-		rm -r $t && echo "FILE DELETED--- $t" && deletedList+=($t) || echo "FILE NOT DELETED--- $t" && missedList+=($t)
+		rm -r $t* && echo "FILE DELETED--- $t" && deletedList+=($t) || echo "FILE NOT DELETED--- $t" && missedList+=($t)
 	done
 fi
 
 # Try deleting the OneDrive.app. Report back the results but don't update the tracking variables.
-# rm -rf /Applications/OneDrive.app && echo "FILE DELETED--- OneDrive.app" || echo "FILE NOT DELETED--- OneDrive.app"
+# rm -rf /Applications/OneDrive.app && echo "FILE DELETED--- OneDrive.app" && deletedList+=("OneDrive.app") || echo "FILE NOT DELETED--- OneDrive.app" && missedList+=("OneDrive.app")
+if [ -d "/Applications/OneDrive.app" ] ; then
+	rm -rf /Applications/OneDrive.app && deletedList+=("OneDrive.app") && fileCount=$((fileCount+1))
+else
+	missedList+=("OneDrive.app")
+fi
 
 echo "FILE COUNT--- Found $fileCount files at end of search."
 echo "DELETED FILE LIST--- "
