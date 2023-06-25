@@ -23,8 +23,10 @@ done
 for f in $eulaList ; do
 	output=$(/usr/libexec/PlistBuddy $eulaFolder/$f -c "Print :User")
 	if [[ $output == $statUser ]]; then
-		echo "Users match."
-	else
-		echo "Users don't match."
+		echo "<result>EULA SIGNED</result>"
+		exit
 	fi
 done
+
+echo "<result>EULA NOT SIGNED</result>"
+exit
