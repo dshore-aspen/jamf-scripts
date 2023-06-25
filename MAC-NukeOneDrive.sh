@@ -40,7 +40,7 @@ for location in ${leftovers[@]} ; do
 	echo "FILE CHECK--- Checking for files in $location"
 	
 # 	Within the current location, build an array of all target items
-	if (ls $location/*OneDrive*); then
+	if (ls $location/ | grep *OneDrive*); then
 		declare -a targets=($location/*OneDrive*)
 		
 # 		For each target found in current location, increment the fileCount variable, attempt to delete the file
@@ -61,8 +61,8 @@ echo "FILE COUNT--- Found $fileCount files so far."
 # Change directory to the user's Application Support folder. Had to do this because the 
 # space in the directory path messed with the arrays.
 cd /Users/$statUser/Library/Application\ Support/
-if (ls ./*OneDrive*); then
-	for t in $(ls ./*OneDrive*); do
+if (ls ./ | grep *OneDrive*); then
+	for t in $(ls ./ | grep *OneDrive*); do
 	fileCount=$((fileCount+1))
 		t=${t%?}
 		echo "FILE FOUND--- $t"
