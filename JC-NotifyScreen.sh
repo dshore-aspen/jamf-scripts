@@ -1,37 +1,44 @@
 #!/bin/zsh
-# tee -a /Users/Shared/Jamf/notify.sh > /dev/null <<EOT
 
+scriptLocation=/Users/derek.shore/Desktop/notify.sh
+touch $scriptLocation
+chmod 777 $scriptLocation
+
+cat << EOF >> $scriptLocation
 #!/bin/zsh 
 #variables
-#NOTIFY_LOG="/var/tmp/depnotify.log"
+
+
+# NOTIFY_LOG="/var/tmp/depnotify.log"
 #For TOKEN_BASIC, use same file path location as set for OIDCIDTokenPath in com.jamf.connect.login
 #TOKEN_BASIC="/tmp/token"
 #TOKEN_GIVEN_NAME=$(echo "$(cat $TOKEN_BASIC)" | sed -e 's/\"//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep given_name | cut -d ":" -f2)
 #TOKEN_UPN=$(echo "$(cat $TOKEN_BASIC)" | sed -e 's/\"//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep upn | cut -d ":" -f2)
 appNameList=(
-    ""
-    ""
-    ""
-    ""
-    ""
-    ""
+    "the ITS remote acces tool"
+    "the ITS security software"
+    "the ITS security software"
+    "some admin tools"
+    "some admin tools"
+    "MS Office"
 )
 
 appInstallCommandList=(
-    ""
-    ""
-    ""
-
+    "install-beyondtrust"
+    "install-rapid7"
+    "install-crowdstrike"
+    "install-jcimages"
+    "install-jamfconnect"
+    "install-office-script"
 )
-installerStepCount="${#appNameList[@]}"
-echo "There are $installerStepCount installers to run."
+commandCount="${#appInstallCommandList[@]}"
+echo "There are ${#appInstallCommandList[@]} installers to run."
 
-exit
 echo $TOKEN_GIVEN_NAME
 echo $TOKEN_UPN
- 
+
 echo "STARTING RUN" >> $NOTIFY_LOG # Define the number of increments for the progress bar
-echo "Command: Determinate: 6" >> $NOTIFY_LOG
+echo "Command: Determinate: ${#appInstallCommandList[@]}" >> $NOTIFY_LOG
  
 #1 - Introduction window with username and animation
 echo "Command: Image: /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-15-retina-touchid-silver.icns" >> $NOTIFY_LOG
@@ -39,6 +46,7 @@ echo "Command: MainTitle: Welcome, $TOKEN_GIVEN_NAME" >> $NOTIFY_LOG
 echo "Command: MainText: Your Mac is now enrolled and will be automatically configured for you." >> $NOTIFY_LOG
 echo "Status: Preparing your new Mac..." >> $NOTIFY_LOG
 sleep 10
+
  
 #2 - Setting up single sign-on passwords for local account
 echo "Command: Image: /System/Applications/Utilities/Keychain Access.app/Contents/Resources/AppIcon.icns" >> $NOTIFY_LOG
@@ -60,25 +68,30 @@ sleep 10
 echo "Command: Image: /System/Library/CoreServices/Install in Progress.app/Contents/Resources/Installer.icns" >> $NOTIFY_LOG
 echo "Command: MainTitle: Installing everything you need for your first day." >> $NOTIFY_LOG
 echo "Command: MainText: All the apps you will need today are already being installed. When setup is complete, you'll find Microsoft Office, Slack, and Zoom are all ready to go. Launch apps from the Dock and have fun!" >> $NOTIFY_LOG
-echo "Status: Installing ITS' remote access tool..." >> $NOTIFY_LOG
-/usr/local/bin/jamf policy -event "install-beyondtrust"
-sleep 5
 
-echo "Status: Installing ITS' antivirus software..." >> $NOTIFY_LOG
-/usr/local/bin/jamf policy -event "install-rapid7"
-/usr/local/bin/jamf policy -event "install-crowdstrike"
-sleep 5
 
-echo "Status: Installing MS Office..." >> $NOTIFY_LOG
-/usr/local/bin/jamf policy -event "install-office-script"
-sleep 5
+run_command() {
+	local name="$1"
+	local appcommand="$2"
+	echo "Status: Installing "$name"..." >> $NOTIFY_LOG
+	/usr/local/bin/jamf policy -event "$appcommand"
+}
 
-install-chrome-script
- 
+nameCounter=1
+EOF
+
+
+echo "while [ $nameCounter -le $commandCount ]; do" >> $scriptLocation
+echo '	echo "$nameCounter"' >> $scriptLocation
+echo '	run_command "${appNameList[$nameCounter]}" "${appInstallCommandList[$nameCounter]}"' >> $scriptLocation
+echo '	(( nameCounter++ ))' >> $scriptLocation
+echo 'done' >> $scriptLocation
+cat << EOF >> $scriptLocation
+
 #5 - Finishing up
 echo "Status: Installing some administrative tools..." >> $NOTIFY_LOG
-/usr/local/bin/jamf policy -event "install-jcimages"
-/usr/local/bin/jamf policy -event "install-jamfconnect"
+/usr/local/bin/jamf policy -event ""
+/usr/local/bin/jamf policy -event ""
 sleep 5
 echo "Status: Finishing up... We're almost ready for you, $TOKEN_GIVEN_NAME" >> $NOTIFY_LOG
 sleep 3
@@ -87,11 +100,11 @@ sleep 3
 sleep 3
 echo "Command: Quit" >> $NOTIFY_LOG
 sleep 1
-rm -rf $NOTIFY_LOG
+ rm -rf $NOTIFY_LOG
  
 #6 - Disable notify screen from loginwindow process
-/usr/local/bin/authchanger -reset -JamfConnect	
+ /usr/local/bin/authchanger -reset -JamfConnect	
 
+EOF
 
-EOT
-exit
+echo "yup"
