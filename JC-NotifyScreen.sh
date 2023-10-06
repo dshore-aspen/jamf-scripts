@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-scriptLocation=/Users/derek.shore/Desktop/notify.sh
+scriptLocation=/Users/Shared/Jamf/notify.sh
 touch $scriptLocation
 chmod 777 $scriptLocation
 
