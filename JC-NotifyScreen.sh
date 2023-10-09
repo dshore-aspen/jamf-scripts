@@ -1,54 +1,54 @@
-#!/bin/zsh
+#!/bin/bash
 
-scriptLocation=/Users/Shared/Jamf/notify.sh
+if [[ -z $4 ]]; then
+	scriptLocation=/Users/Shared/Jamf/notify.sh
+else
+	scriptLocation=$4
+fi
+
 touch $scriptLocation
 chmod 777 $scriptLocation
-
+echo "Writing file to $scriptLocation"
 cat << EOF >> $scriptLocation
 #!/bin/zsh 
 #variables
+NOTIFY_LOG="/var/tmp/depnotify.log"
+appNameCommand=(
+    "the ITS remote acces tool: install-beyondtrust"
+    "the ITS security software: install-rapid7"
+    "the ITS security software: install-crowdstrike"
+    "some admin tools: install-rosetta"
+    "some admin tools: install-jcimages"
+    "some admin tools: install-jamfconnect"
+    "MS Office: install-office-script"
+    "MS Office: install-msaudoupdate"
+    "Adobe Reader: install-adobereader"
 
-
-# NOTIFY_LOG="/var/tmp/depnotify.log"
-#For TOKEN_BASIC, use same file path location as set for OIDCIDTokenPath in com.jamf.connect.login
-#TOKEN_BASIC="/tmp/token"
-#TOKEN_GIVEN_NAME=$(echo "$(cat $TOKEN_BASIC)" | sed -e 's/\"//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep given_name | cut -d ":" -f2)
-#TOKEN_UPN=$(echo "$(cat $TOKEN_BASIC)" | sed -e 's/\"//g' | awk -v k="text" '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | grep upn | cut -d ":" -f2)
-appNameList=(
-    "the ITS remote acces tool"
-    "the ITS security software"
-    "the ITS security software"
-    "some admin tools"
-    "some admin tools"
-    "some admin tools"
-    "MS Office"
-    "MS Office tools"
-    "Adobe Reader"
 )
+# Function to parse "key: value" strings
 
-appInstallCommandList=(
-    "install-beyondtrust"
-    "install-rapid7"
-    "install-crowdstrike"
-    "install-rosetta"
-    "install-jcimages"
-    "install-jamfconnect"
-    "install-office-script"
-    "install-msaudoupdate"
-    "install-adobereader"
-)
-commandCount="${#appInstallCommandList[@]}"
-echo "There are ${#appInstallCommandList[@]} installers to run."
+
+parse_key_value() {
+    local input="$1"
+    IFS=":" read -r key value <<< "$input"
+   	echo "Status: Installing "$key"..." >> $NOTIFY_LOG
+	/usr/local/bin/jamf policy -event "$value"
+    echo "App name: $key"
+    echo "Install command: $value"
+}
+
+commandCount="${#appNameCommand[@]}"
+echo "There are ${#appNameCommand[@]} installers to run."
 
 echo $TOKEN_GIVEN_NAME
 echo $TOKEN_UPN
 
 echo "STARTING RUN" >> $NOTIFY_LOG # Define the number of increments for the progress bar
-echo "Command: Determinate: ${#appInstallCommandList[@]}" >> $NOTIFY_LOG
+echo "Command: Determinate: ${#appNameCommand[@]}" >> $NOTIFY_LOG
  
 #1 - Introduction window with username and animation
 echo "Command: Image: /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-15-retina-touchid-silver.icns" >> $NOTIFY_LOG
-echo "Command: MainTitle: Welcome, $TOKEN_GIVEN_NAME" >> $NOTIFY_LOG
+echo "Command: MainTitle: Welcome to your new Mac" >> $NOTIFY_LOG
 echo "Command: MainText: Your Mac is now enrolled and will be automatically configured for you." >> $NOTIFY_LOG
 echo "Status: Preparing your new Mac..." >> $NOTIFY_LOG
 sleep 10
@@ -56,7 +56,7 @@ sleep 10
  
 #2 - Setting up single sign-on passwords for local account
 echo "Command: Image: /System/Applications/Utilities/Keychain Access.app/Contents/Resources/AppIcon.icns" >> $NOTIFY_LOG
-echo "Command: MainTitle: Tired of remembering multiple passwords? \n $TOKEN_GIVEN_NAME " >> $NOTIFY_LOG
+echo "Command: MainTitle: Tired of remembering multiple passwords?" >> $NOTIFY_LOG
 echo "Command: MainText: We use single sign-on services to help you sign in to each of our corporate services.
 Use your email address and account password to sign in to all necessary applications." >> $NOTIFY_LOG
 echo "Status: Setting the password for your Mac to sync with your network password..." >> $NOTIFY_LOG
@@ -75,31 +75,18 @@ echo "Command: Image: /System/Library/CoreServices/Install in Progress.app/Conte
 echo "Command: MainTitle: Installing everything you need for your first day." >> $NOTIFY_LOG
 echo "Command: MainText: All the apps you will need today are already being installed. When setup is complete, you'll find Microsoft Office, Slack, and Zoom are all ready to go. Launch apps from the Dock and have fun!" >> $NOTIFY_LOG
 
+# Iterate over the array of apps and commands
+for element in "${appNameCommand[@]}"; do
+	parse_key_value "$element"
+done
 
-run_command() {
-	local name="$1"
-	local appcommand="$2"
-	echo "Status: Installing "$name"..." >> $NOTIFY_LOG
-	/usr/local/bin/jamf policy -event "$appcommand"
-}
-
-nameCounter=1
-EOF
-
-
-echo "while [ $nameCounter -le $commandCount ]; do" >> $scriptLocation
-echo '	echo "$nameCounter"' >> $scriptLocation
-echo '	run_command "${appNameList[$nameCounter]}" "${appInstallCommandList[$nameCounter]}"' >> $scriptLocation
-echo '	(( nameCounter++ ))' >> $scriptLocation
-echo 'done' >> $scriptLocation
-cat << EOF >> $scriptLocation
 
 #5 - Finishing up
-echo "Status: Installing some administrative tools..." >> $NOTIFY_LOG
-/usr/local/bin/jamf policy -event ""
-/usr/local/bin/jamf policy -event ""
-sleep 5
-echo "Status: Finishing up... We're almost ready for you, $TOKEN_GIVEN_NAME" >> $NOTIFY_LOG
+# echo "Status: Installing some administrative tools..." >> $NOTIFY_LOG
+# /usr/local/bin/jamf policy -event ""
+# /usr/local/bin/jamf policy -event ""
+# sleep 5
+echo "Status: Finishing up... We're almost ready for you." >> $NOTIFY_LOG
 sleep 3
  
 ###Clean Up
