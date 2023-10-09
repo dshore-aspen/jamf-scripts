@@ -20,16 +20,22 @@ appNameList=(
     "the ITS security software"
     "some admin tools"
     "some admin tools"
+    "some admin tools"
     "MS Office"
+    "MS Office tools"
+    "Adobe Reader"
 )
 
 appInstallCommandList=(
     "install-beyondtrust"
     "install-rapid7"
     "install-crowdstrike"
+    "install-rosetta"
     "install-jcimages"
     "install-jamfconnect"
     "install-office-script"
+    "install-msaudoupdate"
+    "install-adobereader"
 )
 commandCount="${#appInstallCommandList[@]}"
 echo "There are ${#appInstallCommandList[@]} installers to run."
@@ -106,5 +112,8 @@ sleep 1
  /usr/local/bin/authchanger -reset -JamfConnect	
 
 EOF
-
-echo "yup"
+if [[ -f $scriptLocation ]]; then
+	echo "Script appears in $scriptLocation"
+else
+	echo "Script does not appear in $scriptLocation"
+fi
